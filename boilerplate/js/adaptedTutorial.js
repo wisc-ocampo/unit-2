@@ -27,7 +27,7 @@ function createMap(){
 
 function getData(){
     // load the data
-    fetch("data/RainfallAsiamm.geojson")
+    fetch("data/MegaCitiesData.geojson")
         .then(function(response){
             return response.json();
         })
