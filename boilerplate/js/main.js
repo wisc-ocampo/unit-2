@@ -72,7 +72,6 @@ function pointToLayer(feature, latlng){
         weight: 1,
         opacity: 1,
         fillOpacity: 1,
-        radius: 8
     };
 
 // 6.2.1 IMPLEMENT POPUPS
@@ -99,16 +98,15 @@ function pointToLayer(feature, latlng){
     popupContent += "<p><b>Rainfall in month " + month + ":</b> " + feature.properties[attribute] + " millimeters</p>";
 
     //bind the popup to the circle marker
-     layer.bindPopup(popupContent, {
-          offset: new L.Point(0,-options.radius)
-      });
-
+    layer.bindPopup(popupContent, {
+        offset: new L.Point(0,-options.radius)
+    });
     //return the circle marker to the L.geoJson pointToLayer option
     return layer;
 };
 
 //Add circle markers for point features to the map
-function createPropSymbols(data, map){
+function createPropSymbols(data){
     //create a Leaflet GeoJSON layer and add it to the map
     L.geoJson(data, {
         pointToLayer: pointToLayer
@@ -134,4 +132,3 @@ function getData(){
 };
 
 document.addEventListener('DOMContentLoaded',createMap)// greates geoJSON layer
-L.geoJSON(geojsonFeature).addTo(map);
