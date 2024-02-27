@@ -12,18 +12,19 @@ function createMap(){
         zoom: 2
     });
 
-// CHANGE BASE TILELAYER - ESRI WORLD GRAY
+// 6.1 CHANGE BASE TILELAYER - ESRI WORLD GRAY
 
     //add OSM base tilelayer
-    L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
-    }).addTo(map);
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+	attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
+	maxZoom: 16
+}).addTo(map);
 
     //call getData function
     getData(map);
 };
 
-// CHANGE VARIABLE LOOP - year > month
+// 6.1 CHANGE VARIABLE LOOP - year > month
 
 function calculateMinValue(data){
     //create empty array to store all data values
@@ -54,39 +55,68 @@ function calcPropRadius(attValue) {
     return radius;
 };
 
-// SET ATTRIBUTE VARIABLE TO MONTHS ( 1 - 12 )
+// 6.1 SET ATTRIBUTE VARIABLE TO MONTHS ( 1 - 12 )
+// 6.2.1 CHANGE FUNCTION
 
 //Step 3: Add circle markers for point features to the map
-function createPropSymbols(data){
+function pointToLayer(feature, latlng){
 
     //Step 4: Determine which attribute to visualize with proportional symbols
     var attribute = "Month_1";
 
+// 6.2.1 geojsonMarkerOptions > options
     //create marker options
-    var geojsonMarkerOptions = {
+    var options = {
         fillColor: "#ff7800",
-        color: "#fff",
+        color: "#000",
         weight: 1,
         opacity: 1,
-        fillOpacity: 0.8,
+        fillOpacity: 1,
         radius: 8
     };
 
+// 6.2.1 IMPLEMENT POPUPS
+
+//For each feature, determine its value for the selected attribute
+
+    var attValue = Number(feature.properties[attribute]);
+
+    console.log(feature.properties, attValue);
+
+    //Give each feature's circle marker a radius based on its attribute value
+    options.radius = calcPropRadius(attValue);
+
+    //create circle marker layer
+    var layer = L.circleMarker(latlng, options);
+
+// 6.2.1 CHANGE POPUP CONTENTS
+
+    //build popup content string starting with city...Example 2.1 line 24
+    var popupContent = "<p><b>City:</b> " + feature.properties.City + "</p>";
+
+    //add formatted attribute to popup content string
+    var month = attribute.split("_")[1];
+    popupContent += "<p><b>Rainfall in month " + month + ":</b> " + feature.properties[attribute] + " millimeters</p>";
+
+    //bind the popup to the circle marker
+     layer.bindPopup(popupContent, {
+          offset: new L.Point(0,-options.radius)
+      });
+
+    //return the circle marker to the L.geoJson pointToLayer option
+    return layer;
+};
+
+//Add circle markers for point features to the map
+function createPropSymbols(data, map){
+    //create a Leaflet GeoJSON layer and add it to the map
     L.geoJson(data, {
-        pointToLayer: function (feature, latlng) {
-            //Step 5: For each feature, determine its value for the selected attribute
-            var attValue = Number(feature.properties[attribute]);
-
-            //Step 6: Give each feature's circle marker a radius based on its attribute value
-            geojsonMarkerOptions.radius = calcPropRadius(attValue);
-
-            //create circle markers
-            return L.circleMarker(latlng, geojsonMarkerOptions);
-        }
+        pointToLayer: pointToLayer
     }).addTo(map);
 };
 
-// SET DATA TO INDIVIDUAL PROJECT
+
+// 6.1 SET DATA TO INDIVIDUAL PROJECT
 
 //Step 2: Import GeoJSON data
 function getData(){
