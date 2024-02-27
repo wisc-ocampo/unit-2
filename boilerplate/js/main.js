@@ -1,83 +1,107 @@
-// adaptedTutorial.js
-// # pulling MegaCitiesData.geojson
-
-// declare map var in global scope
+// Ocampo, Week 5
+//declare map variable globally so all functions have access
 var map;
-// function to instantiate the Leaflet map
+var minValue;
+
+//step 1 create map
 function createMap(){
-    // create the map
+
+    //create the map
     map = L.map('map', {
-        center: [20, 0],
+        center: [0, 0],
         zoom: 2
     });
 
-    // add OSM base tilelayer
+// CHANGE BASE TILELAYER - ESRI WORLD GRAY
+
+    //add OSM base tilelayer
     L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
     }).addTo(map);
 
-    // call getData function
-    getData();
+    //call getData function
+    getData(map);
 };
 
-// function to retrieve the data and place it on the mapDoDocuments and Settings
-// OR function to attach popups to each mapped feature
+// CHANGE VARIABLE LOOP - year > month
 
-// ## option 1 | pointToLayer
+function calculateMinValue(data){
+    //create empty array to store all data values
+    var allValues = [];
+    //loop through each city
+    for(var city of data.features){
+        //loop through each month
+        for(var month = 1; month <= 12; month+=1){
+              //get population for current year
+              var value = city.properties["Month_"+ String(month)];
+              //add value to array
+              allValues.push(value);
+        }
+    }
+    //get minimum value of our array
+    var minValue = Math.min(...allValues)
 
+    return minValue;
+}
+
+//calculate the radius of each proportional symbol
+function calcPropRadius(attValue) {
+    //constant factor adjusts symbol sizes evenly
+    var minRadius = 5;
+    //Flannery Apperance Compensation formula
+    var radius = 1.0083 * Math.pow(attValue/minValue,0.5715) * minRadius
+
+    return radius;
+};
+
+// SET ATTRIBUTE VARIABLE TO MONTHS ( 1 - 12 )
+
+//Step 3: Add circle markers for point features to the map
+function createPropSymbols(data){
+
+    //Step 4: Determine which attribute to visualize with proportional symbols
+    var attribute = "Month_1";
+
+    //create marker options
+    var geojsonMarkerOptions = {
+        fillColor: "#ff7800",
+        color: "#fff",
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.8,
+        radius: 8
+    };
+
+    L.geoJson(data, {
+        pointToLayer: function (feature, latlng) {
+            //Step 5: For each feature, determine its value for the selected attribute
+            var attValue = Number(feature.properties[attribute]);
+
+            //Step 6: Give each feature's circle marker a radius based on its attribute value
+            geojsonMarkerOptions.radius = calcPropRadius(attValue);
+
+            //create circle markers
+            return L.circleMarker(latlng, geojsonMarkerOptions);
+        }
+    }).addTo(map);
+};
+
+// SET DATA TO INDIVIDUAL PROJECT
+
+//Step 2: Import GeoJSON data
 function getData(){
-    // load the data
-    fetch("data/RainfallAsiamm.geojson")
+    //load the data
+    fetch("data/RainOfAsia.geojson")
         .then(function(response){
             return response.json();
         })
         .then(function(json){
-            // applying pointToLayer
-            var geojsonMarkerOptions = {
-                radius: 8,
-                fillColor: "#ff7800",
-                color: "#000",
-                weight: 1,
-                opacity: 1,
-                fillOpacity: 0.8
-            };
-            // create a Leaflet GeoJSON layer and add it to the map
-            L.geoJson(json, {
-                pointToLayer: function (feature, latlng){
-                    return L.circleMarker(latlng, geojsonMarkerOptions);
-                }
-            }).addTo(map);
-        });
+            //calculate minimum data value
+            minValue = calculateMinValue(json);
+            //call function to create proportional symbols
+            createPropSymbols(json);
+        })
 };
 
-// ## option 2 | onEachFeature
-//
-// function onEachFeature(feature, layer) {
-//     // no property named popupContent; instead, create html string with all properties
-//     var popupContent = "";
-//     if (feature.properties) {
-//         // loop to add feature property names and values to html string
-//         for (var property in feature.properties){
-//             popupContent += "<p>" + property + ": " + feature.properties[property] + "</p>";
-//         }
-//         layer.bindPopup(popupContent);
-//     };
-// };
-//
-// // function to retrieve the data and place it on the map
-// function getData(map){
-//     //load the data
-//     fetch("data/MegaCitiesData.geojson")
-//         .then(function(response){
-//             return response.json();
-//         })
-//         .then(function(json){
-//             //create a Leaflet GeoJSON layer and add it to the map
-//             L.geoJson(json, {
-//                 onEachFeature: onEachFeature
-//             }).addTo(map);
-//         })  
-// };
-//
 document.addEventListener('DOMContentLoaded',createMap)// greates geoJSON layer
 L.geoJSON(geojsonFeature).addTo(map);
