@@ -40,13 +40,14 @@ function calcPropRadius(attValue) {
 
 // 6.1 EDIT, SET ATTRIBUTE TO MONTHS [ 1 - 12 ]
 // 6.2 EDIT, CHANGE FUNCTION
+// 6.3.13 EDIT, SET VARIABLE ATTRIBUTE VALUE
 
-function pointToLayer(feature, latlng){
+function pointToLayer(feature, latlng, attributes){
 
-    var attribute = "Month_1";
+    var attribute = attributes[0];
+    console.log(attribute);
 
 // 6.2.1 EDIT, UPDATE VARIABLE > options
-    //create marker options
     var options = {
         fillColor: "#ff7800",
         color: "#000",
@@ -81,11 +82,13 @@ function pointToLayer(feature, latlng){
     return layer;
 };
 
-//Add circle markers for point features to the map
-function createPropSymbols(data){
-    //create a Leaflet GeoJSON layer and add it to the map
+// 6.3.12 EDIT, ADD PARAMETERS
+
+function createPropSymbols(data, attributes){
     L.geoJson(data, {
-        pointToLayer: pointToLayer
+        pointToLayer: function(feature, latlng){
+            return pointToLayer(feature, latlng, attributes);
+        }
     }).addTo(map);
 };
 
@@ -94,13 +97,77 @@ function createPropSymbols(data){
 function createSequenceControls(){
     var slider = "<input class='range-slider' type='range'></input>";
     document.querySelector("#panel").insertAdjacentHTML('beforeend',slider);
+
+// 6.3.14 ADD, LISTENERS
+
+// 6.3.16 EDIT, FUNCTION
+// 6.3.17 ADD, INDEX UPDATE
+
+    document.querySelectorAll('.step').forEach(function(step){
+        step.addEventListener("click", function(){
+            var index = document.querySelector('.range-slider').value;
+
+            if (step.id == 'forward'){
+                index++;
+                index = index > 11 ? 0 : index;
+            } else if (step.id == 'reverse'){
+                index--;
+                index = index < 0 ? 11 : index;
+            };
+
+            document.querySelector('.range-slider').value = index;
+            console.log(index);
+            updatePropSymbols(attributes[index]);
+        })
+    })
+
+    document.querySelector('.range-slider').addEventListener('input', 
+        
+// 6.3.15 EDIT, FUNCTION
+// 6.3.17 ADD, INDEX UPDATE
+
+        function(){
+            var index = this.value;
+            console.log(index)
+            updatePropSymbols(attributes[index]);
+    });
+
 };
 
-// 6.3.6 EDIT, SLIDER ATTRIBUTES - RETURNING NULL
-    // document.querySelector(".range-slider").max = 11;
-    // document.querySelector(".range-slider").min = 0;
-    // document.querySelector(".range-slider").value = 0;
-    // document.querySelector(".range-slider").step = 1;
+// 6.3.18 ADD, updatePropSymbols FUNCTION
+
+function updatePropSymbols(attribute){
+    map.eachLayer(function(layer){
+
+// 6.3.19 EDIT, if STATEMENT AND POPUP CONTENT, INVALID DUE TO 6.3.6 BELOW
+
+        if (layer.feature && layer.feature.properties[attribute]){
+            
+            var props = layer.feature.properties;
+
+            var radius = calcPropRadius(props[attribute]);
+            layer.setRadius(radius);
+
+            var popupContent = "<p><b>Location:</b> " + 
+                feature.properties.City + "</p>";
+
+            var month = attribute.split("_")[1];
+            popupContent += "<p><b>Rainfall in month " + month + ":</b> " + 
+                feature.properties[attribute] + " millimeters</p>";
+
+            popup = layer.getPopup();            
+            popup.setContent(popupContent).update();
+        };
+    });
+};
+
+// 6.3.6 EDIT, SLIDER ATTRIBUTES
+// RETURNING NULL, BREAKING EVERYTHING, CONTENTS NOT LOADED?
+// All ALLOWS MAP TO LOAD, THOUGH attributes STILL UNDEFINED
+    document.querySelectorAll(".range-slider").max = 11;
+    document.querySelectorAll(".range-slider").min = 0;
+    document.querySelectorAll(".range-slider").value = 0;
+    document.querySelectorAll(".range-slider").step = 1;
 
 // 6.3.7 ADD, STEP BUTTONS
 
@@ -116,7 +183,26 @@ function createSequenceControls(){
     document.querySelector('#forward').
         insertAdjacentHTML('beforeend',"<img src='img/UmbrellaRight.png'>")
 
+// 6.3.11 ADD, ATTRIBUTES ARRAY
+
+function processData(data){
+    var attributes = [];
+
+    var properties = data.features[0].properties;
+
+    for (var attribute in properties){
+        if (attribute.indexOf("Month") > -1){
+            attributes.push(attribute);
+        };
+    };
+
+    console.log(attributes);
+
+    return attributes;
+};
+
 // 6.1 EDIT, SET DATA
+// 6.3 ADD, FUNCTIONS TO AJAX
 
 function getData(map){
     fetch("data/RainOfAsia.geojson")
@@ -124,9 +210,10 @@ function getData(map){
             return response.json();
         })
         .then(function(json){
+            var attributes = processData(json);
             minValue = calculateMinValue(json);
-            createPropSymbols(json);
-            createSequenceControls();
+            createPropSymbols(json, attributes);
+            createSequenceControls(attributes);
         })
 };
 
