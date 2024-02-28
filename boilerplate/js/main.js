@@ -94,12 +94,32 @@ function createPropSymbols(data, attributes){
 
 // 6.3.5 ADD, SLIDER
 
-function createSequenceControls(){
+function createSequenceControls(attributes){
     var slider = "<input class='range-slider' type='range'></input>";
     document.querySelector("#panel").insertAdjacentHTML('beforeend',slider);
 
-// 6.3.14 ADD, LISTENERS
+    // 6.3.6 EDIT, SLIDER ATTRIBUTES
+// RETURNING NULL, BREAKING EVERYTHING, CONTENTS NOT LOADED?
+// All ALLOWS MAP TO LOAD, THOUGH feature STILL UNDEFINED
+    document.querySelector(".range-slider").max = 11;
+    document.querySelector(".range-slider").min = 0;
+    document.querySelector(".range-slider").value = 0;
+    document.querySelector(".range-slider").step = 1;
 
+// 6.3.7 ADD, STEP BUTTONS
+
+    document.querySelector('#panel').
+        insertAdjacentHTML(
+        'beforeend','<button class="step" id="reverse"></button>');
+    document.querySelector('#panel').
+        insertAdjacentHTML(
+        'beforeend','<button class="step" id="forward"></button>');
+
+    document.querySelector('#reverse').
+        insertAdjacentHTML('beforeend',"<img src='img/UmbrellaLeft.png'>")
+    document.querySelector('#forward').
+        insertAdjacentHTML('beforeend',"<img src='img/UmbrellaRight.png'>")
+// 6.3.14 ADD, LISTENERS
 // 6.3.16 EDIT, FUNCTION
 // 6.3.17 ADD, INDEX UPDATE
 
@@ -161,27 +181,7 @@ function updatePropSymbols(attribute){
     });
 };
 
-// 6.3.6 EDIT, SLIDER ATTRIBUTES
-// RETURNING NULL, BREAKING EVERYTHING, CONTENTS NOT LOADED?
-// All ALLOWS MAP TO LOAD, THOUGH attributes STILL UNDEFINED
-    document.querySelectorAll(".range-slider").max = 11;
-    document.querySelectorAll(".range-slider").min = 0;
-    document.querySelectorAll(".range-slider").value = 0;
-    document.querySelectorAll(".range-slider").step = 1;
 
-// 6.3.7 ADD, STEP BUTTONS
-
-    document.querySelector('#panel').
-        insertAdjacentHTML(
-        'beforeend','<button class="step" id="reverse"></button>');
-    document.querySelector('#panel').
-        insertAdjacentHTML(
-        'beforeend','<button class="step" id="forward"></button>');
-
-    document.querySelector('#reverse').
-        insertAdjacentHTML('beforeend',"<img src='img/UmbrellaLeft.png'>")
-    document.querySelector('#forward').
-        insertAdjacentHTML('beforeend',"<img src='img/UmbrellaRight.png'>")
 
 // 6.3.11 ADD, ATTRIBUTES ARRAY
 
