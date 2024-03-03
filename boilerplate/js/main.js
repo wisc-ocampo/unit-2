@@ -169,11 +169,11 @@ function updatePropSymbols(attribute){
             layer.setRadius(radius);
 
             var popupContent = "<p><b>Location:</b> " + 
-                feature.properties.City + "</p>";
+                layer.feature.properties.City + "</p>";
 
             var month = attribute.split("_")[1];
             popupContent += "<p><b>Rainfall in month " + month + ":</b> " + 
-                feature.properties[attribute] + " millimeters</p>";
+                layer.feature.properties[attribute] + " millimeters</p>";
 
             popup = layer.getPopup();            
             popup.setContent(popupContent).update();
