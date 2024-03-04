@@ -68,9 +68,9 @@ function pointToLayer(feature, latlng, attributes){
     options.radius = calcPropRadius(attValue);
     let layer = L.circleMarker(latlng, options);
 
-    let popupContent = createPopupContent(feature.properties, attribute);
+    let popupContent = new PopupContent(feature.properties, attribute);
 
-    layer.bindPopup(popupContent, {
+    layer.bindPopup(popupContent.formatted, {
         offset: new L.Point(0,-options.radius)
     });
 
@@ -146,10 +146,10 @@ function updatePropSymbols(attribute){
             let radius = calcPropRadius(props[attribute]);
             layer.setRadius(radius);
 
-            let popupContent = createPopupContent(props, attribute);
+            let popupContent = new PopupContent(props, attribute);
 
             popup = layer.getPopup();            
-            popup.setContent(popupContent).update();
+            popup.setContent(popupContent.formatted).update();
         };
     });
 };
@@ -168,15 +168,6 @@ function processData(data){
     };
 return attributes;
 };
-
-// create popups
-function createPopupContent(properties, attribute){
-    let popupContent = "<p><b>Location:</b> " + properties.City + "</p>";
-    popupContent += "<p><b>Rainfall in month " + PopupContent.month + ":</b> " + 
-        properties[attribute] + " millimeters</p>";
-    return popupContent;
-};
-
 
 // get data
 function getData(map){
