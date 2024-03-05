@@ -2,7 +2,7 @@
 
 // basic functions
 let map;
-let minValue;
+let dataStats = {};
 const corner1 = L.latLng(40, 50),
     corner2 = L.latLng(0, 130),
     bounds = L.latLngBounds(corner1, corner2);
@@ -34,7 +34,7 @@ function createMap(){
 };
 
 // flannery's
-function calcstats(data){
+function calcStats(data){
     let allValues = [];
     for(let city of data.features){
         for(let month = 1; month <= 12; month+=1){
@@ -45,12 +45,12 @@ function calcstats(data){
     dataStats.min = Math.min(...allValues);
     dataStats.max = Math.max(...allValues);
     let sum = allValues.reduce(function(a, b){return a+b;});
-    dataStats.mean = sum/ allValues.length;
+    dataStats.mean = sum / allValues.length;
 }
 
 function calcPropRadius(attValue) {
     let minRadius = 5;
-    let radius = 1.0083 * Math.pow(attValue/minValue,0.5715) * minRadius
+    let radius = 1.0083 * Math.pow ( attValue / dataStats.min, 0.5715 ) * minRadius
     return radius;
 };
 
@@ -189,7 +189,7 @@ function createLegend(attributes){
 // update index markers
 function updatePropSymbols(attribute){
     let month = attribute.split('_')[1];
-    document.querySelector('span.year').innerHTML = year;
+    document.querySelector('span.month').innerHTML = month;
     map.eachLayer(function(layer){
 
         if (layer.feature && layer.feature.properties[attribute]){
