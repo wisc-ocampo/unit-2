@@ -44,6 +44,7 @@ function calcstats(data){
     }
     dataStats.min = Math.min(...allValues);
     dataStats.max = Math.max(...allValues);
+    let sum = allValues.reduce(function(a, b){return a+b;});
     dataStats.mean = sum/ allValues.length;
 }
 
@@ -154,20 +155,27 @@ function createLegend(attributes){
             let container = L.DomUtil.create('div', 'legend-control-container');
             container.innerHTML = '<p class="temporalLegend">Rainfall in <span class="month">1</span></p>';
             // svg
-            let svg = '<svg id="attribute-legend" width="130px" height="130px">';
+            let svg = '<svg id="attribute-legend" width="160px" height="60px">';
             let circles = ['max', 'mean', 'min'];
 
-            for (var i=0; i<circles.length; i++){  
+            for (let i=0; i<circles.length; i++){  
 
                 let radius = calcPropRadius(dataStats[circles[i]]);  
-                let cy = 130 - radius;  
+                let cy = 59 - radius;  
 
-                svg += '<circle class="legend-circle" id="' + circles[i] + '" r="' +
-                        radius + '"cy="' + cy +
-                        '" fill="#F47821" fill-opacity="0.8" stroke="#000000" cx="65"/>';  
+                svg += '<circle class="legend-circle" id="' + circles[i] +
+                    '" r="' + radius + '"cy="' + cy +
+                    '" fill="#F47821" fill-opacity="0.8" stroke="#000000" cx="30"/>';  
+
+                let textY = i * 20 + 20;
+                svg += '<text id="' + circles[i] + '-text" x="65" y="' +
+                    textY + '">' + Math.round(dataStats[circles[i]]*100)/100 +
+                    " millimeters" + '</text>';
             };  
 
             svg += "</svg>";
+
+            container.insertAdjacentHTML('beforeend',svg);
             // disable secondary response
             L.DomEvent.disableClickPropagation(container);
 
@@ -180,6 +188,8 @@ function createLegend(attributes){
 
 // update index markers
 function updatePropSymbols(attribute){
+    let month = attribute.split('_')[1];
+    document.querySelector('span.year').innerHTML = year;
     map.eachLayer(function(layer){
 
         if (layer.feature && layer.feature.properties[attribute]){
