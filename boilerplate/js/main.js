@@ -34,7 +34,7 @@ function createMap(){
 };
 
 // flannery's
-function calculateMinValue(data){
+function calcstats(data){
     let allValues = [];
     for(let city of data.features){
         for(let month = 1; month <= 12; month+=1){
@@ -42,8 +42,9 @@ function calculateMinValue(data){
               allValues.push(value);
         }
     }
-    let minValue = Math.min(...allValues)
-    return minValue;
+    dataStats.min = Math.min(...allValues);
+    dataStats.max = Math.max(...allValues);
+    dataStats.mean = sum/ allValues.length;
 }
 
 function calcPropRadius(attValue) {
@@ -142,6 +143,41 @@ function createSequenceControls(attributes){
     });
 };
 
+// LEGEND
+function createLegend(attributes){
+    let LegendControl = L.Control.extend({
+        options: {
+            position: 'bottomright'
+        },
+
+        onAdd: function () {
+            let container = L.DomUtil.create('div', 'legend-control-container');
+            container.innerHTML = '<p class="temporalLegend">Rainfall in <span class="month">1</span></p>';
+            // svg
+            let svg = '<svg id="attribute-legend" width="130px" height="130px">';
+            let circles = ['max', 'mean', 'min'];
+
+            for (var i=0; i<circles.length; i++){  
+
+                let radius = calcPropRadius(dataStats[circles[i]]);  
+                let cy = 130 - radius;  
+
+                svg += '<circle class="legend-circle" id="' + circles[i] + '" r="' +
+                        radius + '"cy="' + cy +
+                        '" fill="#F47821" fill-opacity="0.8" stroke="#000000" cx="65"/>';  
+            };  
+
+            svg += "</svg>";
+            // disable secondary response
+            L.DomEvent.disableClickPropagation(container);
+
+            return container;
+        }
+    });
+
+    map.addControl(new LegendControl());
+};
+
 // update index markers
 function updatePropSymbols(attribute){
     map.eachLayer(function(layer){
@@ -183,10 +219,11 @@ function getData(map){
         return response.json();
     })
     .then(function(json){
+        calcStats(json);
         let attributes = processData(json);
-        minValue = calculateMinValue(json);
         createPropSymbols(json, attributes);
         createSequenceControls(attributes);
+        createLegend(attributes);
     })
 };
 

@@ -34,6 +34,20 @@
     float: left;  
 }
 
+.legend-control-container {
+    width: 150px;  
+    height: 170px;  
+    background-color: rgba(255,255,255,0.8);  
+    padding-left: 10px;  
+    padding-right: 10px;
+    padding-bottom: 5px;
+    text-align: center;
+    line-height: 45px;  
+    text-align: center;  
+    border: solid gray 1px;  
+    border-radius: 10px;
+}
+
 .leaflet-popup-content p {
     margin: 0.2em 0; 
 }
