@@ -89,26 +89,34 @@ function createPropSymbols(data, attributes){
 // SEQUENCE CONTROLS
     // slider
 function createSequenceControls(attributes){
-    let slider = "<input class='range-slider' type='range'></input>";
-    document.querySelector("#panel").insertAdjacentHTML('beforeend',slider);
+    let SequenceControl = L.Control.extend({
+        options: {
+            position: 'bottomleft'
+        },
 
+        onAdd: function () {
+    // adding slider
+            let container = L.DomUtil.create(
+                'div', 'sequence-control-container');
+            container.insertAdjacentHTML(
+                'beforeend', '<input class="range-slider" type="range">')
+            container.insertAdjacentHTML('beforeend',
+                '<button class="step" id="reverse" title="Reverse"><img src="img/UmbrellaLeft.png"></button>'); 
+            container.insertAdjacentHTML('beforeend',
+                '<button class="step" id="forward" title="Forward"><img src="img/UmbrellaRight.png"></button>');
+    // disabling secondary response
+            L.DomEvent.disableClickPropagation(container);
+
+            return container;
+        }
+    });
+
+    // slider controls and functionality
+    map.addControl(new SequenceControl());
     document.querySelector(".range-slider").max = 11;
     document.querySelector(".range-slider").min = 0;
     document.querySelector(".range-slider").value = 0;
     document.querySelector(".range-slider").step = 1;
-
-    // step buttons
-    document.querySelector('#panel').insertAdjacentHTML(
-        'beforeend','<button class="step" id="reverse"></button>');
-    document.querySelector('#panel').insertAdjacentHTML(
-        'beforeend','<button class="step" id="forward"></button>');
-
-    // step button images
-    document.querySelector('#reverse').
-        insertAdjacentHTML('beforeend',"<img src='img/UmbrellaLeft.png'>")
-    document.querySelector('#forward').
-        insertAdjacentHTML('beforeend',"<img src='img/UmbrellaRight.png'>")
-
     // identify step button pushed, change index value
     document.querySelectorAll('.step').forEach(function(step){
         step.addEventListener("click", function(){
@@ -121,14 +129,13 @@ function createSequenceControls(attributes){
                 index--;
                 index = index < 0 ? 11 : index;
             };
-            
+    
             document.querySelector('.range-slider').value = index;
             updatePropSymbols(attributes[index]);
         })
     })
 
     document.querySelector('.range-slider').addEventListener('input', 
-
     function(){
         let index = this.value;
         updatePropSymbols(attributes[index]);
