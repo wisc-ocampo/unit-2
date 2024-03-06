@@ -7,8 +7,8 @@
     // data declaration
 let map;
 let dataStats = {};
-const corner1 = L.latLng(40, 50),
-    corner2 = L.latLng(0, 130),
+const corner1 = L.latLng(47.5, 55),
+    corner2 = L.latLng(-17.5, 140),
     bounds = L.latLngBounds(corner1, corner2);
 
 function PopupContent(properties, attribute){
@@ -24,9 +24,11 @@ function PopupContent(properties, attribute){
     // map properties
 function createMap(){
     map = L.map('map', {
-        center: [20, 90],
+        center: [15, 100],
         zoom: 4,
         maxBounds: bounds,
+        zoomSnap: .20,
+        minZoom: 3.5,
     });
 
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/{z}/{y}/{x}', {
@@ -42,11 +44,11 @@ function createMap(){
 function pointToLayer(feature, latlng, attributes){
     let attribute = attributes[0];
     let options = {
-        fillColor: '#ff7800',
-        color: '#000',
+        fillColor: '#aa5a82',
+        color: '#FFF',
         weight: 1,
-        opacity: 1,
-        fillOpacity: 0.8,
+        opacity: .8,
+        fillOpacity: 0.4,
     };
 
     let attValue = Number(feature.properties[attribute]);
@@ -132,25 +134,25 @@ function createSequenceControls(attributes){
 function createLegend(attributes){
     let LegendControl = L.Control.extend({
         options: {
-            position: 'bottomright'
+            position: 'topright'
         },
 
         onAdd: function () {
             let container = L.DomUtil.create('div', 'legend-control-container');
-            container.innerHTML = '<p class="temporalLegend">Rainfall in <span class="month">1</span></p>';
+            container.innerHTML = '<p style="font-size: 12pt; height: 0px" class="temporalLegend"><b>Rainfall in Month <span class="month">1</span></b></p>';
             // svg
-            let svg = '<svg id="attribute-legend" width="160px" height="60px">';
+            let svg = '<svg id="attribute-legend" width="180px" height="160px">';
             let circles = ['max', 'mean', 'min'];
 
             for (let i=0; i<circles.length; i++){  
                 let radius = calcPropRadius(dataStats[circles[i]]);  
-                let cy = 59 - radius;  
+                let cy = 160 - radius;  
                 svg += '<circle class="legend-circle" id="' + circles[i] +
                     '" r="' + radius + '"cy="' + cy +
-                    '" fill="#F47821" fill-opacity="0.8" stroke="#000000" cx="30"/>';  
-                let textY = i * 20 + 20;
-                svg += '<text id="' + circles[i] + '-text" x="65" y="' +
-                    textY + '">' + Math.round(dataStats[circles[i]]*100)/100 +
+                    '" fill="#aa5a82" fill-opacity="0.4" stroke="#FFF" cx="30"/>';  
+                let textY = i * 22 + 110;
+                svg += '<text id="' + circles[i] + '-text" x="90" y="' +
+                    textY + '">' + Math.round(dataStats[circles[i]]) +
                     " millimeters" + '</text>';
             };  
 
@@ -186,7 +188,8 @@ function calcStats(data){
 
 function calcPropRadius(attValue) {
     let minRadius = 5;
-    let radius = 1.0083 * Math.pow ( attValue / dataStats.min, 0.5715 ) * minRadius
+    let trueradius = 1.0083 * Math.pow ( attValue / dataStats.min, 0.5715 ) * minRadius
+    let radius = trueradius * .25
     return radius;
 };
 
@@ -226,7 +229,7 @@ function processData(data){
 
     // get data
 function getData(map){
-    fetch('data/RainOfAsia.geojson')
+    fetch('data/RainOfAsia1.geojson')
     .then(function(response){
         return response.json();
     })
