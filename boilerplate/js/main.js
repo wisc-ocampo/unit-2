@@ -7,8 +7,8 @@
     // data declaration
 let map;
 let dataStats = {};
-const corner1 = L.latLng(47.5, 55),
-    corner2 = L.latLng(-17.5, 140),
+const corner1 = L.latLng(40, 60),
+    corner2 = L.latLng(-5, 120),
     bounds = L.latLngBounds(corner1, corner2);
 
 function PopupContent(properties, attribute){
@@ -21,20 +21,57 @@ function PopupContent(properties, attribute){
         this.rain + " millimeters</p>";
 };
 
+// MAP
     // map properties
 function createMap(){
     map = L.map('map', {
-        center: [15, 100],
-        zoom: 4,
+        center: [15, 90],
+        zoom: 4.25,
         maxBounds: bounds,
-        zoomSnap: .20,
-        minZoom: 3.5,
+        zoomSnap: .25,
+        minZoom: 4,
+        maxZoom: 6,
     });
 
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/{z}/{y}/{x}', {
+    // map layers
+    let Esri_WorldPhysical = L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/{z}/{y}/{x}', {
 	attribution: 'Tiles &copy; Esri &mdash; Source: US National Park Service',
 	maxZoom: 8
 }).addTo(map);
+
+    let Esri_WorldImagery = L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+	attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+})
+
+    let Stadia_StamenTerrainLabels = L.tileLayer(
+        'https://tiles.stadiamaps.com/tiles/stamen_terrain_labels/{z}/{x}/{y}{r}.{ext}', {
+	minZoom: 0,
+	maxZoom: 18,
+	attribution: '&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://www.stamen.com/" target="_blank">Stamen Design</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+	ext: 'png'
+});
+
+    let Stadia_StamenTerrainLines = L.tileLayer(
+        'https://tiles.stadiamaps.com/tiles/stamen_terrain_lines/{z}/{x}/{y}{r}.{ext}', {
+	minZoom: 0,
+	maxZoom: 18,
+	attribution: '&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://www.stamen.com/" target="_blank">Stamen Design</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+	ext: 'png'
+});
+    // map layer controls
+    let baseMaps = {
+        "Physical World": Esri_WorldPhysical,
+        "World Imagery": Esri_WorldImagery
+    };
+
+    let overlayMaps = {
+        "Terrain Labels": Stadia_StamenTerrainLabels,
+        "Terrain Lines": Stadia_StamenTerrainLines
+    };
+
+    let layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
 
     getData(map);
 };
@@ -141,16 +178,16 @@ function createLegend(attributes){
             let container = L.DomUtil.create('div', 'legend-control-container');
             container.innerHTML = '<p style="font-size: 12pt; height: 0px" class="temporalLegend"><b>Rainfall in Month <span class="month">1</span></b></p>';
             // svg
-            let svg = '<svg id="attribute-legend" width="180px" height="160px">';
+            let svg = '<svg id="attribute-legend" width="190px" height="180px">';
             let circles = ['max', 'mean', 'min'];
 
             for (let i=0; i<circles.length; i++){  
                 let radius = calcPropRadius(dataStats[circles[i]]);  
-                let cy = 160 - radius;  
+                let cy = 180 - radius;  
                 svg += '<circle class="legend-circle" id="' + circles[i] +
                     '" r="' + radius + '"cy="' + cy +
                     '" fill="#aa5a82" fill-opacity="0.4" stroke="#FFF" cx="30"/>';  
-                let textY = i * 22 + 110;
+                let textY = i * 22 + 130;
                 svg += '<text id="' + circles[i] + '-text" x="90" y="' +
                     textY + '">' + Math.round(dataStats[circles[i]]) +
                     " millimeters" + '</text>';
@@ -189,7 +226,7 @@ function calcStats(data){
 function calcPropRadius(attValue) {
     let minRadius = 5;
     let trueradius = 1.0083 * Math.pow ( attValue / dataStats.min, 0.5715 ) * minRadius
-    let radius = trueradius * .25
+    let radius = trueradius * .275
     return radius;
 };
 
@@ -229,7 +266,7 @@ function processData(data){
 
     // get data
 function getData(map){
-    fetch('data/RainOfAsia1.geojson')
+    fetch('data/RainOfAsia.geojson')
     .then(function(response){
         return response.json();
     })
