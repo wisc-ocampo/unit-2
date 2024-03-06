@@ -34,3 +34,7 @@ tilesets attributions
 - GIS User Community
 - Stadia Maps
 - OpenStreetMap
+
+## use
+- educational purposes only
+- requires live server for operation
