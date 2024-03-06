@@ -1,4 +1,4 @@
-// Ocampo, Leaflet Lab
+// wisc-ocampo, leaflet lab
 
 // SECTION
     // sub section
@@ -205,7 +205,7 @@ function createLegend(attributes){
 };
 
 // GLOBAL FUNCTIONS
-    // flannery's
+    // flannery's perceptual scaling
 function calcStats(data){
     let allValues = [];
     
@@ -216,13 +216,13 @@ function calcStats(data){
               allValues.push(value);
         }
     }
-
+    // data calculation
     dataStats.min = Math.min(...allValues);
     dataStats.max = Math.max(...allValues);
     let sum = allValues.reduce(function(a, b){return a+b;});
     dataStats.mean = sum / allValues.length;
 }
-
+    // radius calculation
 function calcPropRadius(attValue) {
     let minRadius = 5;
     let trueradius = 1.0083 * Math.pow ( attValue / dataStats.min, 0.5715 ) * minRadius
