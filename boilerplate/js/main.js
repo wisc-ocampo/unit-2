@@ -1,6 +1,10 @@
 // Ocampo, Leaflet Lab
 
-// basic functions
+// SECTION
+    // sub section
+
+// BASIC FUNCTIONS
+    // data declaration
 let map;
 let dataStats = {};
 const corner1 = L.latLng(40, 50),
@@ -17,7 +21,7 @@ function PopupContent(properties, attribute){
         this.rain + " millimeters</p>";
 };
 
-// map properties
+    // map properties
 function createMap(){
     map = L.map('map', {
         center: [20, 90],
@@ -33,31 +37,10 @@ function createMap(){
     getData(map);
 };
 
-// flannery's
-function calcStats(data){
-    let allValues = [];
-    for(let city of data.features){
-        for(let month = 1; month <= 12; month+=1){
-              let value = city.properties["Month_"+ String(month)];
-              allValues.push(value);
-        }
-    }
-    dataStats.min = Math.min(...allValues);
-    dataStats.max = Math.max(...allValues);
-    let sum = allValues.reduce(function(a, b){return a+b;});
-    dataStats.mean = sum / allValues.length;
-}
-
-function calcPropRadius(attValue) {
-    let minRadius = 5;
-    let radius = 1.0083 * Math.pow ( attValue / dataStats.min, 0.5715 ) * minRadius
-    return radius;
-};
-
-// spawn leaflet layer (marker)
+// LEAFLET MARKERS
+    // spawn markers
 function pointToLayer(feature, latlng, attributes){
     let attribute = attributes[0];
-
     let options = {
         fillColor: '#ff7800',
         color: '#000',
@@ -69,7 +52,6 @@ function pointToLayer(feature, latlng, attributes){
     let attValue = Number(feature.properties[attribute]);
     options.radius = calcPropRadius(attValue);
     let layer = L.circleMarker(latlng, options);
-
     let popupContent = new PopupContent(feature.properties, attribute);
 
     layer.bindPopup(popupContent.formatted, {
@@ -79,7 +61,7 @@ function pointToLayer(feature, latlng, attributes){
     return layer;
 };
 
-// create proportional markers
+    // make proportional markers
 function createPropSymbols(data, attributes){
     L.geoJson(data, {
         pointToLayer: function(feature, latlng){
@@ -134,14 +116,16 @@ function createSequenceControls(attributes){
     
             document.querySelector('.range-slider').value = index;
             updatePropSymbols(attributes[index]);
-        })
-    })
+        });
+
+    });
 
     document.querySelector('.range-slider').addEventListener('input', 
     function(){
         let index = this.value;
         updatePropSymbols(attributes[index]);
     });
+
 };
 
 // LEGEND
@@ -159,14 +143,11 @@ function createLegend(attributes){
             let circles = ['max', 'mean', 'min'];
 
             for (let i=0; i<circles.length; i++){  
-
                 let radius = calcPropRadius(dataStats[circles[i]]);  
                 let cy = 59 - radius;  
-
                 svg += '<circle class="legend-circle" id="' + circles[i] +
                     '" r="' + radius + '"cy="' + cy +
                     '" fill="#F47821" fill-opacity="0.8" stroke="#000000" cx="30"/>';  
-
                 let textY = i * 20 + 20;
                 svg += '<text id="' + circles[i] + '-text" x="65" y="' +
                     textY + '">' + Math.round(dataStats[circles[i]]*100)/100 +
@@ -174,11 +155,9 @@ function createLegend(attributes){
             };  
 
             svg += "</svg>";
-
             container.insertAdjacentHTML('beforeend',svg);
             // disable secondary response
             L.DomEvent.disableClickPropagation(container);
-
             return container;
         }
     });
@@ -186,7 +165,32 @@ function createLegend(attributes){
     map.addControl(new LegendControl());
 };
 
-// update index markers
+// GLOBAL FUNCTIONS
+    // flannery's
+function calcStats(data){
+    let allValues = [];
+    
+    for (let city of data.features) {
+        
+        for (let month = 1; month <= 12; month+=1) {
+              let value = city.properties["Month_"+ String(month)];
+              allValues.push(value);
+        }
+    }
+
+    dataStats.min = Math.min(...allValues);
+    dataStats.max = Math.max(...allValues);
+    let sum = allValues.reduce(function(a, b){return a+b;});
+    dataStats.mean = sum / allValues.length;
+}
+
+function calcPropRadius(attValue) {
+    let minRadius = 5;
+    let radius = 1.0083 * Math.pow ( attValue / dataStats.min, 0.5715 ) * minRadius
+    return radius;
+};
+
+    // update index markers
 function updatePropSymbols(attribute){
     let month = attribute.split('_')[1];
     document.querySelector('span.month').innerHTML = month;
@@ -195,10 +199,8 @@ function updatePropSymbols(attribute){
         if (layer.feature && layer.feature.properties[attribute]){
             
             let props = layer.feature.properties;
-
             let radius = calcPropRadius(props[attribute]);
             layer.setRadius(radius);
-
             let popupContent = new PopupContent(props, attribute);
 
             popup = layer.getPopup();            
@@ -207,22 +209,22 @@ function updatePropSymbols(attribute){
     });
 };
 
-
-
-// create data attributes array
+    // create data attributes array
 function processData(data){
     let attributes = [];
     let properties = data.features[0].properties;
 
     for (let attribute in properties){
+
         if (attribute.indexOf('Month') > -1){
             attributes.push(attribute);
         };
     };
-return attributes;
+
+    return attributes;
 };
 
-// get data
+    // get data
 function getData(map){
     fetch('data/RainOfAsia.geojson')
     .then(function(response){
@@ -237,5 +239,5 @@ function getData(map){
     })
 };
 
-// load data
+     // load data
 document.addEventListener('DOMContentLoaded', createMap)

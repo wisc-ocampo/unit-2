@@ -1,9 +1,22 @@
+/* GENERAL */
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: honeydew;
+}
+
+/* ELEMENTS */
+.topbar {
+    background-color: palegreen;
+    overflow: hidden;
+}
+
 #map {    
     height: 640px;    
     width: 100%;
     display: inline-block;
     }
 
+/* Leaflet */
 .sequence-control-container {  
     width: 350px;  
     height: 30px;  
