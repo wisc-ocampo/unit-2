@@ -21,6 +21,15 @@ body {
     }
 
 /* LEAFLET */
+    /* title */
+.title-container {
+    width: 350px;  
+    height: 50px;  
+    line-height: 20px;  
+    text-align: center;  
+    padding: 10px;
+}
+
     /* slider */
 .sequence-control-container {  
     width: 350px;  
@@ -58,6 +67,7 @@ body {
     border: 0px;
     border-radius: 35px;
 }
+
     /* legend */
 .legend-control-container {
     width: 200px;  

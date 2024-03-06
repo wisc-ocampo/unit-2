@@ -109,6 +109,25 @@ function createPropSymbols(data, attributes){
     }).addTo(map);
 };
 
+// TITLE
+function createTitle(attributes){
+    let TitleControl = L.Control.extend({
+        options: {
+            position: 'bottomleft'
+        },
+
+        onAdd: function () {
+            let titleContainer = L.DomUtil.create('div', 'title-container');
+            titleContainer.innerHTML = 
+                '<p style="font-size: 16pt; height: 0px" class="titleContainer"><b>Monthly Rainfall Across<br>South and Southeast Asia</b></p>';
+            L.DomEvent.disableClickPropagation(titleContainer);
+            return titleContainer;
+        }
+    });
+    map.addControl(new TitleControl());
+};
+
+
 // SEQUENCE CONTROLS
     // slider
 function createSequenceControls(attributes){
@@ -186,7 +205,7 @@ function createLegend(attributes){
                 let cy = 180 - radius;  
                 svg += '<circle class="legend-circle" id="' + circles[i] +
                     '" r="' + radius + '"cy="' + cy +
-                    '" fill="#aa5a82" fill-opacity="0.4" stroke="#FFF" cx="30"/>';  
+                    '" fill="#aa5a82" fill-opacity="0.4" stroke="#FFF" cx="45"/>';  
                 let textY = i * 22 + 130;
                 svg += '<text id="' + circles[i] + '-text" x="90" y="' +
                     textY + '">' + Math.round(dataStats[circles[i]]) +
@@ -247,8 +266,33 @@ function updatePropSymbols(attribute){
             popup.setContent(popupContent.formatted).update();
         };
     });
+    updateLegend(attribute);
 };
 
+function updateLegend(attribute) {
+    let month = attribute.split('_')[1];
+    document.querySelector('span.month').innerHTML = month;
+    
+    let allValues = [];
+	map.eachLayer(function (layer) {
+		if (layer.feature) {
+			allValues.push(layer.feature.properties[attribute]);
+		}
+	});
+
+	let circleValues = {
+		min: Math.min(...allValues),
+		max: Math.max(...allValues),
+		mean: allValues.reduce(function (a, b) { return a + b; }) / allValues.length
+	}
+
+	for (let key in circleValues) {
+        let radius = calcPropRadius(circleValues[key]);
+	    document.querySelector("#" + key).setAttribute("cy", 180 - radius);
+	    document.querySelector("#" + key).setAttribute("r", radius)
+	    document.querySelector("#" + key + "-text").textContent = Math.round(circleValues[key]) + " millimeters";
+    }
+}
     // create data attributes array
 function processData(data){
     let attributes = [];
@@ -276,6 +320,7 @@ function getData(map){
         createPropSymbols(json, attributes);
         createSequenceControls(attributes);
         createLegend(attributes);
+        createTitle(attributes);
     })
 };
 
